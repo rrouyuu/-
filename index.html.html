@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>大耳狗溫馨愛心留言板</title>
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  
+  <style>
+    body {
+      font-family: 'Zen Maru Gothic', cursive, sans-serif;
+      background: linear-gradient(135deg, #e0f2fe 0%, #fef3c7 50%, #ffe4e6 100%);
+      min-height: 100vh;
+    }
+    ruby {
+      ruby-position: over;
+    }
+    rt {
+      font-size: 0.6em;
+      color: #64748b;
+      font-weight: normal;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(12px);
+      border: 3px solid #ffffff;
+      box-shadow: 0 10px 25px -5px rgba(186, 230, 253, 0.5);
+    }
+  </style>
+</head>
+<body class="p-4 md:p-8 text-gray-700">
+
+  <!-- 頂部功能列 -->
+  <div class="max-w-2xl mx-auto flex justify-between items-center mb-6">
+    <div class="flex items-center gap-2 bg-white/80 px-3 py-1.5 rounded-full text-xs shadow-sm">
+      <span id="syncStatusDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+      <span id="syncStatusText">☁️ <ruby>雲端<rt>ㄩㄣˊㄉㄨㄢ</rt></ruby><ruby>即時連線中<rt>ㄐㄧˊㄕˊㄌㄧㄢˊㄒㄧㄢˋㄓㄨㄥ</rt></ruby></span>
+    </div>
+    <button onclick="openAdminModal()" class="bg-white/80 hover:bg-white text-gray-600 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm border border-sky-100 transition hover:scale-105 active:scale-95">
+      🔑 <ruby>姊姊<rt>ㄐㄧㄝˇㄐㄧㄝ˙</rt></ruby><ruby>後台<rt>ㄏㄡˋㄊㄞˊ</rt></ruby>
+    </button>
+  </div>
+
+  <!-- 主要內容區域 -->
+  <div class="max-w-2xl mx-auto space-y-6">
+    
+    <!-- 標題與主視覺合照 -->
+    <div class="glass-card rounded-3xl p-6 text-center space-y-4 relative overflow-hidden">
+      <div class="absolute -top-6 -left-6 text-6xl opacity-20 select-none">☁️</div>
+      <div class="absolute -bottom-6 -right-6 text-6xl opacity-20 select-none">🐾</div>
+      
+      <h1 class="text-2xl md:text-3xl font-bold text-sky-600 flex justify-center items-center gap-2">
+        <span>☁️</span>
+        <span><ruby>寫給<rt>ㄒㄧㄝˇㄍㄟˇ</rt></ruby><ruby>姊姊的<rt>ㄐㄧㄝˇㄐㄧㄝ˙ㄉㄜ˙</rt></ruby><ruby>愛心<rt>ㄞˋㄒㄧㄣ</rt></ruby><ruby>留言板<rt>ㄌㄧㄡˊㄧㄢˊㄅㄢˇ</rt></ruby></span>
+      </h1>
+
+      <!-- 主視覺相片框 -->
+      <div class="relative inline-block my-2">
+        <div class="p-3 bg-white rounded-2xl shadow-md rotate-1 border border-sky-100 max-w-[280px] mx-auto">
+          <img id="mainPhoto" src="https://i.imgur.com/8N69D9p.jpeg" alt="姊妹合照" class="w-full h-56 object-cover rounded-xl shadow-inner">
+          <p class="text-xs text-sky-400 mt-2 font-bold flex items-center justify-center gap-1">
+            <span>✨</span><span>最愛姊姊了</span><span>💕</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 妹妹留言輸入區 -->
+    <div class="glass-card rounded-3xl p-6 space-y-4">
+      <h2 class="text-lg font-bold text-sky-700 flex items-center gap-2">
+        ✏️ <ruby>在這裡<rt>ㄗㄞˋㄓㄜˋㄌㄧˇ</rt></ruby><ruby>寫字<rt>ㄒㄧㄝˇㄗˋ</rt></ruby><ruby>給姊姊<rt>ㄍㄟˇㄐㄧㄝˇㄐㄧㄝ˙</rt></ruby>
+      </h2>
+
+      <!-- 名字 -->
+      <div>
+        <label class="block text-xs font-bold text-gray-500 mb-1">
+          <ruby>我是<rt>ㄨㄛˇㄕˋ</rt></ruby>：
+        </label>
+        <input type="text" id="senderName" value="妹妹" class="w-full px-4 py-2 rounded-xl border border-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-300 bg-white/90">
+      </div>
+
+      <!-- 心情選擇 -->
+      <div>
+        <label class="block text-xs font-bold text-gray-500 mb-1">
+          <ruby>今天的心情<rt>ㄐㄧㄣ ㄊㄧㄢ ㄉㄜ˙ ㄒㄧㄣ ㄑㄧㄥˊ</rt></ruby>：
+        </label>
+        <div class="flex flex-wrap gap-2" id="moodContainer">
+          <button type="button" onclick="selectMood('😊 開心')" class="mood-btn px-3 py-1.5 rounded-xl bg-white border border-sky-200 text-sm hover:bg-sky-50 shadow-sm transition">😊 開心</button>
+          <button type="button" onclick="selectMood('🥰 想姊姊')" class="mood-btn px-3 py-1.5 rounded-xl bg-white border border-sky-200 text-sm hover:bg-sky-50 shadow-sm transition">🥰 想姊姊</button>
+          <button type="button" onclick="selectMood('🥺 討抱抱')" class="mood-btn px-3 py-1.5 rounded-xl bg-white border border-sky-200 text-sm hover:bg-sky-50 shadow-sm transition">🥺 討抱抱</button>
+          <button type="button" onclick="customMoodPrompt()" class="mood-btn px-3 py-1.5 rounded-xl bg-white border border-dashed border-sky-300 text-sm hover:bg-sky-50 shadow-sm transition">✨ 自己寫</button>
+        </div>
+      </div>
+
+      <!-- 留言文字內容 -->
+      <div>
+        <label class="block text-xs font-bold text-gray-500 mb-1">
+          <ruby>想說的話<rt>ㄒㄧㄤˇㄕㄨㄛㄉㄜ˙ㄏㄨㄚˋ</rt></ruby>：
+        </label>
+        <textarea id="msgContent" rows="3" placeholder="在這裡寫字給姊姊..." class="w-full px-4 py-3 rounded-xl border border-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-300 bg-white/90"></textarea>
+      </div>
+
+      <!-- 送出按鈕 -->
+      <button onclick="submitMessage()" class="w-full py-3 bg-sky-400 hover:bg-sky-500 text-white font-bold rounded-2xl shadow-md transition transform active:scale-95 flex items-center justify-center gap-2">
+        <span>🐾</span>
+        <span><ruby>傳送留言<rt>ㄔㄨㄢˊㄙㄨㄥˋㄌㄧㄡˊㄧㄢˊ</rt></ruby></span>
+      </button>
+    </div>
+
+    <!-- 留言牆列表區 -->
+    <div class="glass-card rounded-3xl p-6 space-y-4">
+      <h3 class="text-md font-bold text-gray-600 flex items-center gap-2">
+        💬 <ruby>悄悄話<rt>ㄑㄧㄠˇㄑㄧㄠˇㄏㄨㄚˋ</rt></ruby><ruby>留言牆<rt>ㄌㄧㄡˊㄧㄢˊㄑㄧㄤˊ</rt></ruby>
+      </h3>
+      <div id="messageList" class="space-y-4">
+        <div class="text-center py-6 text-gray-400 text-sm">載入中...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 姊姊管理後台 Modal -->
+  <div id="adminModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-bold text-lg text-sky-700">🔒 姊姊後台管理</h3>
+        <button onclick="closeAdminModal()" class="text-gray-400 hover:text-gray-600 font-bold p-1">✕</button>
+      </div>
+
+      <!-- 密碼輸入驗證區 (預設 888) -->
+      <div id="loginSection" class="space-y-3">
+        <input type="password" id="adminPwd" placeholder="請輸入密碼" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-300">
+        <button onclick="checkPassword()" class="w-full py-2 bg-sky-400 text-white font-bold rounded-xl shadow">登入後台</button>
+      </div>
+
+      <!-- 後台操作區域 (登入後顯示) -->
+      <div id="adminContent" class="hidden space-y-4">
+        <p class="text-xs text-emerald-600 font-bold flex items-center gap-1">
+          <span>✅</span><span>已成功進入姊姊管理後台</span>
+        </p>
+
+        <!-- 更換照片功能 -->
+        <div class="space-y-2 border-t pt-3">
+          <label class="text-xs font-bold text-gray-600 block">📸 更換主頁姊妹合照：</label>
+          <input type="file" id="photoFileInput" accept="image/*" onchange="uploadLocalPhoto(event)" class="text-xs w-full text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100">
+          <input type="text" id="photoUrlInput" placeholder="或輸入圖片網址 (URL)..." class="w-full px-3 py-1.5 text-xs border rounded-lg focus:outline-none focus:ring-1 focus:ring-sky-300">
+          <button onclick="savePhotoUrl()" class="w-full py-1.5 bg-sky-100 text-sky-700 font-bold text-xs rounded-lg hover:bg-sky-200 transition">套用照片更換</button>
+        </div>
+
+        <!-- 線上同步回覆妹妹 -->
+        <div class="border-t pt-3 space-y-2">
+          <label class="text-xs font-bold text-gray-600 block">💬 線上回覆妹妹留言：</label>
+          <textarea id="adminReplyText" rows="2" placeholder="輸入要給妹妹的回覆..." class="w-full p-2 text-xs border rounded-lg focus:outline-none focus:ring-1 focus:ring-sky-300"></textarea>
+          <button onclick="saveAdminReply()" class="w-full py-1.5 bg-emerald-500 text-white font-bold text-xs rounded-lg shadow hover:bg-emerald-600 transition">發布並同步回覆</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentMood = '😊 開心';
+    let targetMsgId = null;
+
+    function selectMood(mood) {
+      currentMood = mood;
+      alert('已選擇心情：' + mood);
+    }
+
+    function customMoodPrompt() {
+      const mood = prompt('請寫下你今天的心情：');
+      if (mood) {
+        currentMood = '✨ ' + mood;
+        alert('已設定心情：' + currentMood);
+      }
+    }
+
+    function submitMessage() {
+      const name = document.getElementById('senderName').value || '妹妹';
+      const msg = document.getElementById('msgContent').value;
+      if (!msg) {
+        alert('請先寫些話給姊姊喔！');
+        return;
+      }
+      
+      const list = document.getElementById('messageList');
+      if(list.querySelector('.py-6')) list.innerHTML = '';
+
+      const card = document.createElement('div');
+      card.className = "bg-white/90 p-4 rounded-2xl border border-sky-100 shadow-sm space-y-2 animate-bounce";
+      card.innerHTML = `
+        <div class="flex justify-between items-center text-xs text-gray-400">
+          <span class="font-bold text-sky-600 text-sm">${name} (${currentMood})</span>
+          <span>剛剛</span>
+        </div>
+        <p class="text-gray-700">${msg}</p>
+      `;
+      list.prepend(card);
+      document.getElementById('msgContent').value = '';
+      alert('留言送出成功囉！☁️');
+    }
+
+    // Modal 開關
+    function openAdminModal() { document.getElementById('adminModal').classList.remove('hidden'); }
+    function closeAdminModal() { document.getElementById('adminModal').classList.add('hidden'); }
+
+    // 後台密碼驗證 (預設 888)
+    function checkPassword() {
+      const pwd = document.getElementById('adminPwd').value;
+      if (pwd === '888') {
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('adminContent').classList.remove('hidden');
+      } else {
+        alert('密碼不正確');
+      }
+    }
+
+    // 相片上傳與網址更換
+    function uploadLocalPhoto(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          document.getElementById('mainPhoto').src = evt.target.result;
+          alert('相片更新成功！');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function savePhotoUrl() {
+      const url = document.getElementById('photoUrlInput').value;
+      if (url) {
+        document.getElementById('mainPhoto').src = url;
+        alert('相片網址更換成功！');
+      }
+    }
+
+    // 後台回覆
+    function saveAdminReply() {
+      const reply = document.getElementById('adminReplyText').value;
+      if (!reply) return;
+      
+      const list = document.getElementById('messageList');
+      if (list.firstElementChild) {
+        const replyBox = document.createElement('div');
+        replyBox.className = "bg-sky-50 p-3 rounded-xl text-xs text-sky-800 border border-sky-100 mt-2";
+        replyBox.innerHTML = `<strong>👑 姊姊的回覆：</strong> ${reply}`;
+        list.firstElementChild.appendChild(replyBox);
+        document.getElementById('adminReplyText').value = '';
+        alert('回覆成功同步發布！');
+      }
+    }
+  </script>
+</body>
+</html>

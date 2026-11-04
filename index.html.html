@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#dff3ff">
+  <title>大耳狗的秘密信箱 ☁️</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@400;500&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="sky-doodle doodle-one">✦</div><div class="sky-doodle doodle-two">♡</div>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="大耳狗的秘密信箱首頁"><span class="brand-cloud">☁</span><span>大耳狗的秘密信箱<small>給姊姊的一封小小的信</small></span></a>
+    <button id="admin-open" class="admin-link" type="button">姊姊的信箱 ↗</button>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-art" aria-hidden="true">
+        <div class="sun">✦</div><div class="cloud cloud-a"></div><div class="cloud cloud-b"></div>
+        <div class="dog-face"><div class="ear ear-left"></div><div class="ear ear-right"></div><div class="face"><i class="eye eye-left"></i><i class="eye eye-right"></i><i class="cheek cheek-left"></i><i class="cheek cheek-right"></i><i class="mouth"></i></div></div>
+        <span class="sparkle s1">✧</span><span class="sparkle s2">♡</span><span class="sparkle s3">✦</span>
+      </div>
+      <div class="hero-copy">
+        <p class="eyebrow">A LITTLE LETTER IN THE SKY</p>
+        <h1>哈囉！今天想跟<br><em>姊姊</em>說什麼呢？</h1>
+        <p class="hero-desc">把今天的心情、學校的小故事，<br>或是想念姊姊的話，都寫在這裡吧！</p>
+        <div class="hand-note">慢慢寫，姊姊會看見的 ♡</div>
+      </div>
+    </section>
+
+    <section class="letter-card" id="write">
+      <div class="card-heading"><span class="stamp">✉</span><div><p class="eyebrow">YOUR LITTLE LETTER</p><h2>寫一封信給姊姊</h2></div><span class="heading-star">✧</span></div>
+      <form id="letter-form">
+        <label for="nickname">我的名字 <span class="zhuyin">ㄨㄛˇ ㄉㄜ˙ ㄇㄧㄥˊ ㄗ˙</span></label>
+        <input id="nickname" name="nickname" maxlength="24" placeholder="例如：妹妹" autocomplete="nickname" required>
+        <label for="message">想跟姊姊說的話 <span class="zhuyin">ㄒㄧㄤˇ ㄍㄣ ㄐㄧㄝˇ ㄐㄧㄝ˙ ㄕㄨㄛ ㄉㄜ˙ ㄏㄨㄚˋ</span></label>
+        <textarea id="message" name="message" rows="6" maxlength="1500" placeholder="姊姊～今天我想跟妳說……" required></textarea>
+        <div class="form-foot"><span id="count">0 / 1500</span><span>✦ 每一封信都很珍貴</span></div>
+        <input class="website" type="text" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button class="send-button" type="submit"><span>把信寄出去</span><span>♡</span></button>
+        <p id="form-status" class="status" role="status" aria-live="polite"></p>
+      </form>
+      <div class="tiny-footer">☁︎ 用一點點勇氣，寄出一點點心意 ☁︎</div>
+    </section>
+    <section class="bottom-note"><span>✧</span> 不管今天開心、難過，還是有小秘密，都可以寫給姊姊。 <span>♡</span></section>
+  </main>
+
+  <div class="modal-backdrop" id="admin-modal" hidden>
+    <section class="admin-panel" role="dialog" aria-modal="true" aria-labelledby="admin-title">
+      <button class="close-modal" id="admin-close" aria-label="關閉">×</button>
+      <p class="eyebrow">ONLY FOR BIG SISTER</p><h2 id="admin-title">姊姊的秘密後台</h2>
+      <div id="login-area">
+        <p class="admin-intro">使用設定好的姊姊信箱登入，系統會寄送登入連結。</p>
+        <label for="admin-email">姊姊的 Gmail</label>
+        <input id="admin-email" type="email" value="laileen0706@gmail.com" autocomplete="email">
+        <button id="login-button" class="send-button" type="button">寄送登入連結 ♡</button>
+        <p id="login-status" class="status" role="status"></p>
+      </div>
+      <div id="inbox-area" hidden>
+        <div class="inbox-toolbar"><span id="signed-in"></span><button id="logout-button" class="small-button">登出</button></div>
+        <div id="letters-list" class="letters-list"><p class="muted">正在讀取信件……</p></div>
+      </div>
+    </section>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
